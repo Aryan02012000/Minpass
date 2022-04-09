@@ -1,0 +1,39 @@
+.container{
+    width: 350px;
+    margin: 0 auto;
+
+}
+
+.generator{
+    background: #000;
+    width: 100%;
+}
+
+.generate_password{
+    border-radius: 10px;
+    width: 100%;
+    position: relative;
+    background-color: #aaa;
+    padding: 6px 2px;
+    color:#fff;
+    height: 50px;
+    margin-bottom: 40px;
+}
+.copy__btn{
+    position: absolute;
+    background-color: #000;
+    color:#fff;
+    border: none;
+    height: 40px;
+    padding: 10px;
+    cursor: pointer;
+    top: 5px;
+    right:3px;
+    border-radius: 5px;
+}
+.form-group{
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    margin-bottom: 15px;
+}
