@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import styled from "styled-components";
 import { Marginer } from "../marginer";
 import { Nav } from "../vault/Nav";
@@ -7,7 +7,7 @@ import { Nav } from "../vault/Nav";
 import { Button } from "../homepage/button";
 import './sty.css'
 import { numbers, upperCaseLetters, lowerCaseLetters, specialCharactes } from './character'
-import {toast, ToastContainer} from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Copy_Success } from './message';
 
@@ -68,155 +68,168 @@ const Generate = () => {
 
   const [password, setpassword] = useState('')
   const [passwordLength, setPasswordLength] = useState(32)
-  const [includeUppercase,setIncludeUppercase] = useState(false)
-  const [includeLowercase,setIncludeLowercase] = useState(false)
-  const [includeNumbers,setIncludeNumbers] = useState(false)
-  const [includeSymbols,setSymbols] = useState(false)
-  
+  const [includeUppercase, setIncludeUppercase] = useState(false)
+  const [includeLowercase, setIncludeLowercase] = useState(false)
+  const [includeNumbers, setIncludeNumbers] = useState(false)
+  const [includeSymbols, setSymbols] = useState(false)
+  const audioElement = useRef(null)
+
   const handleGeneratePassword = (e) => {
-    
-    if(!includeLowercase && !includeNumbers && !includeSymbols && !includeUppercase) {
-      notify('you must select atleast one option',true)
+
+    if (!includeLowercase && !includeNumbers && !includeSymbols && !includeUppercase) {
+      notify('you must select atleast one option', true)
     }
     let characterList = ""
-    
-    if(includeUppercase){
+
+    if (includeUppercase) {
       characterList = characterList + upperCaseLetters
     }
 
-    if(includeLowercase){
+    if (includeLowercase) {
       characterList = characterList + lowerCaseLetters
     }
-    if(includeNumbers){
+    if (includeNumbers) {
       characterList = characterList + numbers
     }
-    if(includeSymbols){
+    if (includeSymbols) {
       characterList = characterList + specialCharactes
     }
 
 
 
-setpassword(createPassword(characterList))
+    setpassword(createPassword(characterList))
   }
-  
+
   const createPassword = (characterList) => {
     let password = ""
     const characterListLength = characterList.length
-    
-    for ( let i=0; i< passwordLength; i++){
-        const characterIndex = Math.round(Math.random() * characterListLength)
-        password = password + characterList.charAt(characterIndex)
+
+    for (let i = 0; i < passwordLength; i++) {
+      const characterIndex = Math.round(Math.random() * characterListLength)
+      password = password + characterList.charAt(characterIndex)
     }
-      return password
+    return password
   }
 
-  const copyToClipboard =() => {
-    const newTextArea = document.createElement('textarea')
-    newTextArea.innerText = password
-    document.body.appendChild(newTextArea)
-    newTextArea.select()
-    document.execCommand('copy')
-   newTextArea.remove()
+  const copyToClipboard = () => {
+
+    try {
+      navigator.clipboard.writeText(password)
+    } catch {
+      const newTextArea = document.createElement('textarea')
+      newTextArea.innerText = password
+      document.body.appendChild(newTextArea)
+      newTextArea.select()
+      document.execCommand('copy')
+      newTextArea.remove()
+    }
   }
 
-const notify = (message, hasError = false) =>{
-  if(hasError){
-    toast.error(message, {
-      position: "top-center",
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
+  const notify = (message, hasError = false) => {
+    if (hasError) {
+      toast.error(message, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
       });
-  } else {
-    toast.success(message, {
-      position: "top-center",
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      });  
+    } else {
+      toast.success(message, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   }
-}
 
   const handleCopyPassword = (e) => {
-    if(password === ""){
+    if (password === "") {
       notify('Nothing to Copy', true)
     } else {
       copyToClipboard()
       notify(Copy_Success)
-    }   
     }
+  }
 
   return (
     <AppContainer>
       <Nav />
       <InnerContainer>
       </InnerContainer>
-          <HeadContent>Password Generator</HeadContent>
+      <HeadContent>Password Generator</HeadContent>
 
-        <div className='container'>
-          <div className='generator'>
-             <div className='generate_password'>           
-           
+      <div className='container'>
+        <div className='generator'>
+          <div className='generate_password'>
+
             <LowContent>
               {password}
             </LowContent>
             <button className='copy__btn' onClick={handleCopyPassword}>
               <i className='far fa-clipboard'></i>
             </button>
-           
-           
-            </div>
-          
+
+
+          </div>
+
           <div className='form-group'>
-            <label htmlFor='password-strength' style={{"fontSize":"1.2em"}}>Password Length</label>
+            <label htmlFor='password-strength' style={{ "fontSize": "1.2em" }}>Password Length</label>
             <input defaultValue={passwordLength} onChange={(e) => setPasswordLength(e.target.value)} type="number" id="password-strength" name="password-strength" max="256" min="8" />
           </div>
 
           <div className='form-group'>
-            <label htmlFor='uppercase-letters' style={{"fontSize":"1.2em"}} >Include Uppercase Letters</label>
+            <label htmlFor='uppercase-letters' style={{ "fontSize": "1.2em" }} >Include Uppercase Letters</label>
             <input checked={includeUppercase} onChange={(e) => setIncludeUppercase(e.target.checked)} type="checkbox" id="uppercase-letters" name="uppercase-letters" max="256" min="8" />
           </div>
 
           <div className='form-group'>
-            <label htmlFor='lowercase-letters' style={{"fontSize":"1.2em"}} >Include Lowercase Letters</label>
+            <label htmlFor='lowercase-letters' style={{ "fontSize": "1.2em" }} >Include Lowercase Letters</label>
             <input checked={includeLowercase} onChange={(e) => setIncludeLowercase(e.target.checked)} type="checkbox" id="lowercase-letters" name="lowercase-letters" max="256" min="8" />
           </div>
 
           <div className='form-group'>
-            <label htmlFor='include-numbers' style={{"fontSize":"1.2em"}}>Include Numbers</label>
-            <input checked={includeNumbers} onChange={(e) => setIncludeNumbers(e.target.checked)}  type="checkbox" id="include-numbers" name="include-numbers" max="256" min="8" />
+            <label htmlFor='include-numbers' style={{ "fontSize": "1.2em" }}>Include Numbers</label>
+            <input checked={includeNumbers} onChange={(e) => setIncludeNumbers(e.target.checked)} type="checkbox" id="include-numbers" name="include-numbers" max="256" min="8" />
           </div>
 
           <div className='form-group'>
-            <label htmlFor='include-symbols' style={{"fontSize":"1.2em" }}>Include Symbols</label>
+            <label htmlFor='include-symbols' style={{ "fontSize": "1.2em" }}>Include Symbols</label>
             <input checked={includeSymbols} onChange={(e) => setSymbols(e.target.checked)} type="checkbox" id="include-symbols" name="include-symbols" max="256" min="8" />
           </div>
-          <Marginer direction="vertical" margin="1em"/>
+          <Marginer direction="vertical" margin="1em" />
 
           <div className='container'>
-          <Button style={{width:"100%"}} onClick={handleGeneratePassword} > Generate Password </Button>
-          <ToastContainer
-position="top-center"
-autoClose={5000}
-hideProgressBar={false}
-newestOnTop={false}
-closeOnClick
-rtl={false}
-pauseOnFocusLoss
-draggable
-pauseOnHover
-/>
-          </div>
-          </div>
-          </div>
+            <Button style={{ width: "100%" }} onClick={handleGeneratePassword} > Generate Password </Button>
 
-      
+            <Marginer direction="vertical" margin="1em" />
+             
+            <Button style={{ width: "100%" }}> Sample audio</Button>
+            <Marginer direction="vertical" margin="1em" />
+            
+          <audio ref={audioElement} controls ></audio>
+            <ToastContainer
+              position="top-center"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
+          </div>
+        </div>
+      </div>
+
+
       {/* </FormContainer>
       </BoxContainer>
        */}

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   BoldLink,
   BoxContainer,
@@ -21,6 +21,7 @@ import {useNavigate} from 'react-router-dom';
   const [cpassword,setCpassword]=React.useState("");
   const navigate=useNavigate();
   const [disabled,setDisable]=React.useState(false);
+  const [question, setQuestion] = useState("Select Question");
 
   const handleSignup=e=>{
     if(disabled){
@@ -55,7 +56,21 @@ import {useNavigate} from 'react-router-dom';
         <Input type="number" placeholder="Phone No." onInput={e=>setPhone(e.target.value)} />
         <Input type="password" placeholder="Password" onInput={e=>setPassword(e.target.value)} />
         <Input type="password" placeholder="Confirm Password" onInput={e=>setCpassword(e.target.value)} />
-     
+        <select
+         style={{"color": "#000", "borderBlockColor": "#fff","fontSize": "12.5px","padding": ".5em", "font": "#000"}}
+         
+         value={question} 
+         onChange = {(e) => {
+            const selectquestion = e.target.value;
+            setQuestion(selectquestion);
+        }} >
+        <option value="Select your question...">Select your question...</option>
+        <option value="In what city were you born?">In what city were you born?</option>
+        <option value="What is the name of your favorite pet?">What is the name of your favorite pet?</option>
+        <option selected value="What high school did you attend?">What high school did you attend?</option>
+        <option value="What was your favorite food as a child?">What was your favorite food as a child?</option>
+        </select>   
+        <Input type="Text" placeholder="Answer"  />
       </FormContainer>
       <Marginer direction="vertical" margin={10} />
       {/* <MutedLink href="#">Forget your password?</MutedLink> */}
@@ -66,7 +81,7 @@ import {useNavigate} from 'react-router-dom';
       
       <Marginer direction="vertical" margin="1em"/>
       <MutedLink href="#">Already have an account<BoldLink href="#" onClick={switchToSignin}><u>Login</u></BoldLink></MutedLink>
-      
+      <Marginer direction="vertical" margin="2em"/>
       </BoxContainer>
     );
 }

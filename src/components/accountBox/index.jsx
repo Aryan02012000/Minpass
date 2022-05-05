@@ -4,6 +4,9 @@ import { LoginForm } from "./loginForm";
 import { motion } from "framer-motion";
 import { SignupForm } from "./signupForm";
 import { AccountContext } from "./accountContext";
+import { ForgetForm } from "./forget";
+import { VerifyForm } from "./verify";
+import { ConfirmForm } from "./confirmpass";
 
 const AppContainer = styled.div`
   width: 100%;
@@ -130,7 +133,26 @@ const AccountBox = () => {
       },400);
     }
 
-const contextValue={switchToSignup, switchToSignin};
+    const switchToForget = () => {
+      play();
+      setTimeout(() => {
+       setActive("forget");
+      },400);
+    }
+    const switchToVerify = () => {
+      play();
+      setTimeout(() => {
+       setActive("verify");
+      },400);
+    }
+    const switchToConfirm = () => {
+      play();
+      setTimeout(() => {
+       setActive("confirm");
+      },400);
+    }
+
+const contextValue={switchToSignup, switchToSignin, switchToForget, switchToVerify, switchToConfirm};
 
   return(
     <AppContainer>
@@ -151,10 +173,28 @@ const contextValue={switchToSignup, switchToSignin};
         <HeaderText>MinPass </HeaderText>
         <SmallText>Create Account</SmallText>
       </HeaderContainer>}
+      {active === "forget" && <HeaderContainer>
+        <HeaderText>MinPass </HeaderText>
+        <SmallText>Verify your email</SmallText>
+      </HeaderContainer>}
+      {active === "verify" && <HeaderContainer>
+        <HeaderText>MinPass </HeaderText>
+        <SmallText>Give the verified answer</SmallText>
+      </HeaderContainer>}
+      {active === "confirm" && <HeaderContainer>
+        <HeaderText>MinPass </HeaderText>
+        <SmallText>Reset you password</SmallText>
+      </HeaderContainer>}
+      
+
     </TopContainer>
     <InnerContainer>
      {active === "signin" && <LoginForm/>}
      {active === "signup" && <SignupForm/>}
+     {active === "forget" && <ForgetForm/>}
+     {active === "verify" && <VerifyForm/>}
+     {active === "confirm" && <ConfirmForm/>}
+     
     </InnerContainer>
   </BoxContainer>
   </AccountContext.Provider>

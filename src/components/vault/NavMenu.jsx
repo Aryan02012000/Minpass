@@ -50,7 +50,7 @@ export function NavMenu({ isOpen }) {
   return <NavMenuContainer>
       <NavList>
           <NavLink initial={false} animate={isOpen ? "show" : "hide"} variants={{show: { ...variants.show, transition: { delay: 0.3, duration: 0.2 } }, hide: { ...variants.hide, transition: { delay: 0.25, duration: 0.05 },}}}>
-          <Link1 to="/vault">Vault</Link1>
+          <Link1 to="/vault">Your Passwords</Link1>
           </NavLink>
 
         <NavLink
@@ -67,7 +67,7 @@ export function NavMenu({ isOpen }) {
             },
           }}
         >
-         <Link1 to="/storage">Storage</Link1>
+         <Link1 to="/storage">Secure Notes</Link1>
         </NavLink>
         <NavLink
           initial={false}
@@ -99,7 +99,23 @@ export function NavMenu({ isOpen }) {
             },
           }}
         >
-          <Link1 to="/setting">Setting</Link1>
+          <Link1 to="/filevault">FileVault</Link1>
+        </NavLink>
+        <NavLink
+          initial={false}
+          animate={isOpen ? "show" : "hide"}
+          variants={{
+            show: {
+              ...variants.show,
+              transition: { delay: 0.8, duration: 0.2 },
+            },
+            hide: {
+              ...variants.hide,
+              transition: { delay: 0.30, duration: 0.05 },
+            },
+          }}
+        >
+          <Link1 to="/">Logout</Link1>
         </NavLink>
       </NavList>
   </NavMenuContainer>

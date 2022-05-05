@@ -1,0 +1,26 @@
+.file-card {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 3px #000;
+    background-color: #bbb;
+    min-width: 380px;
+    min-height: 230px;
+    max-height: 300px;
+    border-radius: 2ch; 
+        }
+
+.file-inputs {
+    position: relative;
+    margin-bottom: 1.5em;
+}
+.main {
+    font-weight: bold;
+    margin-bottom: 0.4em;
+}
+
+.info {
+    font-size: 0.8rem;
+}

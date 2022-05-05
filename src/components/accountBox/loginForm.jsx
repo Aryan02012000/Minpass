@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
    const [email,setEmail]=React.useState("");
    const [password,setPassword]=React.useState("");
    const { switchToSignup } = useContext(AccountContext);
+   const { switchToForget } = useContext(AccountContext);
    const navigate=useNavigate();
    const [disabled,setDisable]=React.useState(false);
 
@@ -56,7 +57,7 @@ import { useNavigate } from "react-router-dom";
      
       </FormContainer>
       <Marginer direction="vertical" margin={10} />
-      <MutedLink href="#">Forget your password?</MutedLink>
+      <BoldLink href="#" onClick={switchToForget}><u>Forget your password?</u></BoldLink>
       <Marginer direction="vertical" margin="1.6em" />
       <SubmitButton type="submit"  onClick={handleLogin}>
       {/* <Link1 to="/vault">Login</Link1> */}

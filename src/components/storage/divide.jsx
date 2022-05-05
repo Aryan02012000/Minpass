@@ -6,6 +6,9 @@ import uuid from "react-uuid";
 
 function Divide() {
 
+    if(!window.localStorage.notes){
+        window.localStorage.setItem('notes',JSON.stringify([]))
+    }
     const [notes, setNotes]= useState(JSON.parse(localStorage.notes) || []);
     const [activeNote, setActiveNote] = useState(false);
 

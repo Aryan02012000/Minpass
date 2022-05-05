@@ -7,6 +7,7 @@ import {Routes, Route} from "react-router-dom";
 import Generator from "./components/generator";
 import Storage from "./components/storage";
 import Setting from "./components/setting";
+import FileStore from "./components/filevault";
 const App = () => {
   return (
 
@@ -17,6 +18,7 @@ const App = () => {
    <Route exact path='/generator' element={ <Generator/>} />
    <Route exact path='/storage' element={ <Storage/>} /> 
    <Route exact path='/setting' element={ <Setting/>} />  
+   <Route exact path='/filevault' element={ <FileStore/>} />
  </Routes>
   
   );

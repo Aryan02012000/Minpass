@@ -166,7 +166,7 @@ const HomeVault = () => {
       <Nav />
       <InnerContainer>
       </InnerContainer>
-      <SomeContent>Vault</SomeContent>
+      <SomeContent>Your Passwords</SomeContent>
      
       
       <form onSubmit={handleEditFormSubmit} style={{ width: "95%", display: "flex"}}>
