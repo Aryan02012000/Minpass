@@ -213,7 +213,7 @@ const Generate = () => {
             <Button style={{ width: "100%" }}> Sample audio</Button>
             <Marginer direction="vertical" margin="1em" />
             
-          <audio ref={audioElement} controls ></audio>
+          <audio ref={audioElement} controls style={{}} ></audio>
             <ToastContainer
               position="top-center"
               autoClose={5000}
