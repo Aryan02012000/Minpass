@@ -82,6 +82,8 @@ const Generate = () => {
   const sampleData = useRef([]);
   const genIndex = useRef(0);
 
+  const sampleTimeBase = 1200;
+
   const handleGeneratePassword = (e) => {
     if (
       !includeLowercase &&
@@ -115,10 +117,20 @@ const Generate = () => {
     const characterListLength = characterList.length;
     const gen = randomGenerator();
 
-    for (let i = 0; i < passwordLength; i++) {
-      // const characterIndex = Math.round(Math.random() * characterListLength);
-      const characterIndex = Math.round(gen.next().value * characterListLength);
-      password = password + characterList.charAt(characterIndex);
+    if (sampleData.current.length) {
+      notify("Using True Random generator", false);
+      for (let i = 0; i < passwordLength; i++) {
+        const characterIndex = Math.round(
+          gen.next().value * characterListLength
+        );
+        password = password + characterList.charAt(characterIndex);
+      }
+    } else {
+      notify("Using PRNG, sample audio for True Random", true);
+      for (let i = 0; i < passwordLength; i++) {
+        const characterIndex = Math.round(Math.random() * characterListLength);
+        password = password + characterList.charAt(characterIndex);
+      }
     }
     return password;
   };
@@ -164,7 +176,7 @@ const Generate = () => {
     let values = sampleData.current;
 
     while (true) {
-      yield values[genIndex.current % vals.length];
+      yield values[genIndex.current % values.length];
       genIndex.current++;
     }
   }
@@ -231,7 +243,7 @@ const Generate = () => {
       //   }
       // });
       // console.log(dict);
-    }, Math.random() * 1000);
+    }, Math.random() * sampleTimeBase);
     generate();
   };
 
