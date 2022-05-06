@@ -81,6 +81,7 @@ const Generate = () => {
   const audioElement = useRef(null);
   const sampleData = useRef([]);
   const genIndex = useRef(0);
+  const micAllowed = useRef(false);
 
   const sampleTimeBase = 1200;
 
@@ -117,7 +118,7 @@ const Generate = () => {
     const characterListLength = characterList.length;
     const gen = randomGenerator();
 
-    if (sampleData.current.length) {
+    if (sampleData.current.length && micAllowed) {
       notify("Using True Random generator", false);
       for (let i = 0; i < passwordLength; i++) {
         const characterIndex = Math.round(
@@ -248,7 +249,7 @@ const Generate = () => {
   };
 
   const sample = () => {
-    if (listening) {
+    if (listening && micAllowed.current) {
       handleStream(null);
       setListening(false);
     } else {
@@ -257,6 +258,7 @@ const Generate = () => {
       navigator.mediaDevices
         .getUserMedia({ audio: true, video: false })
         .then((s) => {
+          micAllowed.current = true;
           setStream(s);
           handleStream(s, true);
           setTimeout(() => sample, 1200);
@@ -269,6 +271,7 @@ const Generate = () => {
             console.error(e.message);
             notify("Error connecting microphone", true);
           }
+          setListening(false);
         });
     }
   };
