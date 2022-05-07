@@ -57,7 +57,7 @@ import {useNavigate} from 'react-router-dom';
         <Input type="password" placeholder="Password" onInput={e=>setPassword(e.target.value)} />
         <Input type="password" placeholder="Confirm Password" onInput={e=>setCpassword(e.target.value)} />
         <select
-         style={{"color": "#000", "borderBlockColor": "#fff","fontSize": "12.5px","padding": ".5em", "font": "#000"}}
+         style={{"color": "#000", "borderBlockColor": "#fff","fontSize": "12.5px","padding": ".5em", "font": "#000",   "border-radius": "1em"}}
          
          value={question} 
          onChange = {(e) => {

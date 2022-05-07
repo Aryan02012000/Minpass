@@ -7,6 +7,8 @@ import { AccountContext } from "./accountContext";
 import { ForgetForm } from "./forget";
 import { VerifyForm } from "./verify";
 import { ConfirmForm } from "./confirmpass";
+import BackgroundImg from "../../assets/pictures/3382865257_7dedef23b0_o.jpg";
+
 
 const AppContainer = styled.div`
   width: 100%;
@@ -15,8 +17,21 @@ const AppContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #000;
-`;
+  // background-color: #000;
+  background-image: url(${BackgroundImg});
+  background-position: center;
+  `;
+
+
+const BackgroundFilter = styled.div`
+  width: 100%;
+  height: 100%;
+  background-color: rgba(45, 45, 45, 0.56);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  `;
 
 
 const BoxContainer = styled.div`
@@ -25,11 +40,12 @@ const BoxContainer = styled.div`
   display: flex;
   flex-direction: column;
   border-radius: 19px;
-  background-color: #fff;
+  background-color: #ddd;
   box-shadow: 0 0 2px rgba(15, 15, 15, 0.28);
   position: relative;
   overflow: hidden;
-`;
+  margin-top: 70px;
+  `;
 const TopContainer = styled.div`
   width: 100%;
   height: 250px;
@@ -156,6 +172,7 @@ const contextValue={switchToSignup, switchToSignin, switchToForget, switchToVeri
 
   return(
     <AppContainer>
+      <BackgroundFilter>
 <AccountContext.Provider value={contextValue}>
   <BoxContainer>
     <TopContainer>
@@ -198,6 +215,7 @@ const contextValue={switchToSignup, switchToSignin, switchToForget, switchToVeri
     </InnerContainer>
   </BoxContainer>
   </AccountContext.Provider>
+   </BackgroundFilter>
   </AppContainer>
   );
 }
