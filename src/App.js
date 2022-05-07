@@ -8,7 +8,9 @@ import Generator from "./components/generator";
 import Storage from "./components/storage";
 import Setting from "./components/setting";
 import FileStore from "./components/filevault";
+
 const App = () => {
+  
   return (
 
  <Routes>

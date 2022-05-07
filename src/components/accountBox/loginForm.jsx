@@ -11,6 +11,7 @@ import { Marginer } from "../marginer";
 import { AccountContext } from "./accountContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { pbkdf2 } from 'crypto'
 
 function LoginForm(props) {
   const [email, setEmail] = React.useState("");
@@ -40,7 +41,14 @@ function LoginForm(props) {
         if (res.status == 200) {
           window.localStorage.setItem("token", res.data.token);
           setDisable(false);
+          // pbkdf2(password, email, 100001, 512, "sha512",(e,k)=>{
+          //   if(e){
+          //     window.alert("failed generating key");
+          //   }
+          //   window.localStorage.setItem('privateKey',k)
+
           return navigate("/vault");
+          // })
         } else if (res.status == 400) {
           return navigate("/vault");
         } else {
@@ -52,7 +60,14 @@ function LoginForm(props) {
         console.error(err);
         //  window.alert("Failed")
         setDisable(false);
-        return navigate("/vault");
+        pbkdf2(password, email, 100001, 512, "sha512", (e, k) => {
+          if (e) {
+            window.alert("failed generating key");
+          }
+          window.localStorage.setItem('derivedkey', k.toString('hex'))
+
+          return navigate("/vault");
+        })
       });
   };
 
