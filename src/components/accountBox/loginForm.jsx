@@ -20,7 +20,49 @@ function LoginForm(props) {
   const { switchToSignup } = useContext(AccountContext);
   const { switchToForget } = useContext(AccountContext);
   const navigate = useNavigate();
-  const [disabled, setDisable] = React.useState(false);
+  const [disabled, setDisable] = React.useState(true);
+
+  useEffect(() => {
+    if (
+      !window.localStorage.getItem("publicKey") ||
+      !window.localStorage.getItem("privateKey")
+    ) {
+      (async () => {
+        try {
+          const keyPair = await cryptoUtils.generateRSAKeyPair();
+          const exportedPublicKey = await cryptoUtils.exportKey(
+            keyPair.publicKey,
+            "spki"
+          );
+          const exportedPrivateKey = await cryptoUtils.exportKey(
+            keyPair.privateKey,
+            "pkcs8"
+          );
+          window.localStorage.setItem("publicKey", exportedPublicKey);
+          window.localStorage.setItem("privateKey", exportedPrivateKey);
+        } catch (e) {
+          window.location.reload();
+        }
+      })();
+    } else {
+      (async () => {
+        const publicKey = window.localStorage.getItem("publicKey");
+        const privateKey = window.localStorage.getItem("privateKey");
+
+        const importedPublicKey = await cryptoUtils.importKey(
+          publicKey,
+          "spki"
+        );
+        const importedPrivateKey = await cryptoUtils.importKey(
+          privateKey,
+          "pkcs8"
+        );
+
+        console.log(importedPublicKey, importedPrivateKey);
+      })();
+    }
+    setDisable(false);
+  });
 
   const handleLogin = (e) => {
     if (!email || !password) {
