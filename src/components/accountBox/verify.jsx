@@ -19,7 +19,6 @@ import {useNavigate} from 'react-router-dom';
   const [email,setEmail]=React.useState("");
   const [phone,setPhone]=React.useState("");
   const [password,setPassword]=React.useState("");
-  const [cpassword,setCpassword]=React.useState("");
   const navigate=useNavigate();
   const [disabled,setDisable]=React.useState(false);
 
@@ -55,7 +54,7 @@ import {useNavigate} from 'react-router-dom';
           <Marginer direction="vertical" margin="2em"/>
       <FormContainer>
         
-        <Input type="text" placeholder="Your Queation" onInput={e=>setEmail(e.target.value)} /> 
+        <Input type="text" placeholder="Your Question" onInput={e=>setQuestion(e.target.value)} /> 
         <Input type="text" placeholder="Answer" onInput={e=>setEmail(e.target.value)} />         
       </FormContainer>
       <Marginer direction="vertical" margin={10} />

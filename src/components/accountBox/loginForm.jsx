@@ -13,6 +13,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import config from "../../config.json";
 import cryptoUtils from "../cryptoUtils";
+import { toast, ToastContainer } from "react-toastify";
 
 function LoginForm(props) {
   const [email, setEmail] = React.useState("");
@@ -66,7 +67,15 @@ function LoginForm(props) {
 
   const handleLogin = (e) => {
     if (!email || !password) {
-      window.alert("Email and Password required");
+      toast.error("Email and password required", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
 
@@ -83,18 +92,31 @@ function LoginForm(props) {
         if (res.status == 200) {
           window.localStorage.setItem("token", res.data.token);
           setDisable(false);
-
-          return navigate("/vault");
-        } else if (res.status == 400) {
           return navigate("/vault");
         } else {
-          // window.alert("Failed")
+          toast.error(res.data.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
           setDisable(false);
         }
       })
       .catch(async (err) => {
+        toast.error("Failed to connect", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
         console.error(err);
-        //  window.alert("Failed")
         setDisable(false);
         return navigate("/vault");
       });
@@ -127,12 +149,21 @@ function LoginForm(props) {
       </SubmitButton>
 
       <Marginer direction="vertical" margin="1em" />
-      <MutedLink href="#">
-        Don't have an account
-        <BoldLink href="#" onClick={switchToSignup}>
-          <u>Signup</u>
-        </BoldLink>
-      </MutedLink>
+      <MutedLink href="#">Don't have an account</MutedLink>
+      <BoldLink href="#" onClick={switchToSignup}>
+        <u>Signup</u>
+      </BoldLink>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </BoxContainer>
   );
 }
