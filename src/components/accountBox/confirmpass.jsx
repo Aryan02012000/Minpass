@@ -12,12 +12,10 @@ import { AccountContext } from "./accountContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import config from "../../config.json";
 
 function ConfirmForm(props) {
   const { switchToSignin } = useContext(AccountContext);
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [phone, setPhone] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [cpassword, setCpassword] = React.useState("");
   const navigate = useNavigate();
@@ -25,7 +23,7 @@ function ConfirmForm(props) {
 
   const [question, setQuestion] = useState("Select Question");
 
-  const handleSignup = (e) => {
+  const handleSubmit = (e) => {
     if (disabled) {
       return;
     }
@@ -43,25 +41,62 @@ function ConfirmForm(props) {
       setDisable(false);
       return;
     }
+
     axios
-      .post(window.localStorage.getItem("0serverAddress") + "/signup", {
-        name,
-        email,
-        phone,
+      .post(config.serverAddress + "/api/update_pass", {
+        email: props.email,
         password,
+        security_ans: props.answer,
       })
       .then((res) => {
         if (res.status == 200) {
-          setDisable(false);
-          return navigate("/signup");
+          toast.success("Success", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          toast.success("Redirecting to login", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          setTimeout(() => {
+            switchToSignin();
+          }, 2100);
         } else {
           setDisable(false);
+          toast.error(res.data.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
         }
       })
       .catch((err) => {
+        toast.error("Failed to connect", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
         console.error(err);
-        window.alert("Failed");
         setDisable(false);
+        switchToSignin();
       });
   };
 
@@ -69,6 +104,7 @@ function ConfirmForm(props) {
     <BoxContainer>
       <Marginer direction="vertical" margin="2em" />
       <FormContainer>
+        <Input type="email" disabled={true} value={props.email} />
         <Input
           type="password"
           placeholder="Enter New Password"
@@ -83,7 +119,7 @@ function ConfirmForm(props) {
       <Marginer direction="vertical" margin={10} />
 
       <Marginer direction="vertical" margin="3em" />
-      <SubmitButton type="submit" onClick={handleSignup}>
+      <SubmitButton type="submit" onClick={handleSubmit}>
         {disabled ? "Loading" : "Reset"}
       </SubmitButton>
 
