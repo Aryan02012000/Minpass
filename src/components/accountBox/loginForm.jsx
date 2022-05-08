@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   BoldLink,
   BoxContainer,
@@ -11,7 +11,8 @@ import { Marginer } from "../marginer";
 import { AccountContext } from "./accountContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { pbkdf2 } from 'crypto'
+import config from "../../config.json";
+import cryptoUtils from "../cryptoUtils";
 
 function LoginForm(props) {
   const [email, setEmail] = React.useState("");
@@ -19,7 +20,49 @@ function LoginForm(props) {
   const { switchToSignup } = useContext(AccountContext);
   const { switchToForget } = useContext(AccountContext);
   const navigate = useNavigate();
-  const [disabled, setDisable] = React.useState(false);
+  const [disabled, setDisable] = React.useState(true);
+
+  useEffect(() => {
+    if (
+      !window.localStorage.getItem("publicKey") ||
+      !window.localStorage.getItem("privateKey")
+    ) {
+      (async () => {
+        try {
+          const keyPair = await cryptoUtils.generateRSAKeyPair();
+          const exportedPublicKey = await cryptoUtils.exportKey(
+            keyPair.publicKey,
+            "spki"
+          );
+          const exportedPrivateKey = await cryptoUtils.exportKey(
+            keyPair.privateKey,
+            "pkcs8"
+          );
+          window.localStorage.setItem("publicKey", exportedPublicKey);
+          window.localStorage.setItem("privateKey", exportedPrivateKey);
+        } catch (e) {
+          window.location.reload();
+        }
+      })();
+    } else {
+      (async () => {
+        const publicKey = window.localStorage.getItem("publicKey");
+        const privateKey = window.localStorage.getItem("privateKey");
+
+        const importedPublicKey = await cryptoUtils.importKey(
+          publicKey,
+          "spki"
+        );
+        const importedPrivateKey = await cryptoUtils.importKey(
+          privateKey,
+          "pkcs8"
+        );
+
+        console.log(importedPublicKey, importedPrivateKey);
+      })();
+    }
+    setDisable(false);
+  });
 
   const handleLogin = (e) => {
     if (!email || !password) {
@@ -29,11 +72,10 @@ function LoginForm(props) {
 
     if (disabled) {
       return navigate("/vault");
-      //  return
     }
     setDisable(true);
     axios
-      .post(window.localStorage.getItem("serverAddress") + "/login", {
+      .post(config.serverAddress + "/login", {
         email,
         password,
       })
@@ -41,14 +83,8 @@ function LoginForm(props) {
         if (res.status == 200) {
           window.localStorage.setItem("token", res.data.token);
           setDisable(false);
-          // pbkdf2(password, email, 100001, 512, "sha512",(e,k)=>{
-          //   if(e){
-          //     window.alert("failed generating key");
-          //   }
-          //   window.localStorage.setItem('privateKey',k)
 
           return navigate("/vault");
-          // })
         } else if (res.status == 400) {
           return navigate("/vault");
         } else {
@@ -56,18 +92,11 @@ function LoginForm(props) {
           setDisable(false);
         }
       })
-      .catch((err) => {
+      .catch(async (err) => {
         console.error(err);
         //  window.alert("Failed")
         setDisable(false);
-        pbkdf2(password, email, 100001, 512, "sha512", (e, k) => {
-          if (e) {
-            window.alert("failed generating key");
-          }
-          window.localStorage.setItem('derivedkey', k.toString('hex'))
-
-          return navigate("/vault");
-        })
+        return navigate("/vault");
       });
   };
 
