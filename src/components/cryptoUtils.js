@@ -111,7 +111,7 @@ export function importKey(keyData, format) {
           hash: "SHA-512",
         },
         true,
-        format == "spki" ? ["encrypt"] : format == "pkcs8" ? ["decrypt"] : []
+        format === "spki" ? ["encrypt"] : format === "pkcs8" ? ["decrypt"] : []
       )
       .then(resolve)
       .catch(reject);
