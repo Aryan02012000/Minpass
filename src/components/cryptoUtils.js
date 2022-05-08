@@ -19,7 +19,7 @@ export function generateRSAKeyPair() {
           modulusLength: 2048,
           name: "RSA-OAEP",
           publicExponent: new Uint8Array([1, 0, 1]),
-          hash: "SHA-256",
+          hash: "SHA-512",
         },
         true,
         ["encrypt", "decrypt"]
@@ -91,11 +91,40 @@ export function PBKDF2(password, salt, iterations = 100001) {
   });
 }
 
+export function exportKey(key, format, toString = true) {
+  return new Promise((resolve, reject) => {
+    window.crypto.subtle
+      .exportKey(format, key)
+      .then((ek) => resolve(toString ? arrayBufferToString(ek) : ek))
+      .catch(reject);
+  });
+}
+
+export function importKey(keyData, format) {
+  return new Promise((resolve, reject) => {
+    window.crypto.subtle
+      .importKey(
+        format,
+        stringToArrayBuffer(keyData),
+        {
+          name: "RSA-OAEP",
+          hash: "SHA-512",
+        },
+        true,
+        format == "spki" ? ["encrypt"] : format == "pkcs8" ? ["decrypt"] : []
+      )
+      .then(resolve)
+      .catch(reject);
+  });
+}
+
 const cryptoUtils = {
   generateRSAKeyPair,
   encrypt,
   decrypt,
   PBKDF2,
+  exportKey,
+  importKey,
 };
 
 export default cryptoUtils;
