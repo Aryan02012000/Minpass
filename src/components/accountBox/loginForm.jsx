@@ -59,9 +59,31 @@ function LoginForm(props) {
           "pkcs8"
         );
 
-        console.log(importedPublicKey, importedPrivateKey);
+        // console.log(importedPublicKey, importedPrivateKey);
       })();
     }
+
+    if (window.localStorage.getItem("token")) {
+      (async () => {
+        try {
+          const res = await axios.get(
+            config.serverAddress +
+              "/api/user?jwt=" +
+              window.localStorage.getItem("token")
+          );
+          if (res.status == 200) {
+            navigate("/vault");
+          } else {
+          }
+        } catch (e) {
+          navigate("/vault");
+          setDisable(false);
+        }
+      })();
+    } else {
+      setDisable(false);
+    }
+
     setDisable(false);
   });
 
@@ -90,7 +112,8 @@ function LoginForm(props) {
       })
       .then((res) => {
         if (res.status == 200) {
-          window.localStorage.setItem("token", res.data.token);
+          // console.log(res.data.token.toString());
+          window.localStorage.setItem("token", "res.data.token");
           setDisable(false);
           return navigate("/vault");
         } else {

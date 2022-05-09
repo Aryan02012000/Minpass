@@ -10,6 +10,7 @@ import { Button } from "../homepage/button";
 //import { HiddenItem } from "./HiddenItem"
 import ReadOnlyRow from "./ReadOnlyRow";
 import EditableRow from "./EditableRow";
+import config from "../../config.json";
 
 const AppContainer = styled.div`
   width: 100%;
@@ -46,8 +47,12 @@ const HomeVault = () => {
   const [users, setUser] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    if (localStorage.getItem("token")) {
       loadUsers();
+      (async () => {
+        const result = await axios.get(config.serverAddress + "/users");
+        setUser(result.data);
+      })();
     } else {
       navigate("/signup");
     }
@@ -58,7 +63,7 @@ const HomeVault = () => {
   const [info, setinfo] = useState(false);
 
   const loadUsers = async () => {
-    const result = await axios.get("http://localhost:3003/users");
+    const result = await axios.get(config.serverAddress + "/users");
     setUser(result.data);
   };
   const [addFormData, setAddFormData] = useState({

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import React from "react";
 import styled from "styled-components";
-import { Link as Link1} from "react-router-dom";
+import { Link as Link1, useNavigate } from "react-router-dom";
 
 const NavMenuContainer = styled.div`
   width: 100%;
@@ -22,7 +22,8 @@ const NavLink = styled(motion.li)`
   display: flex;
   align-items: center;
   cursor: pointer;
-  a {
+  a,
+  span {
     text-decoration: none;
     color: #444;
     font-size: 20px;
@@ -38,20 +39,41 @@ const NavLink = styled(motion.li)`
 const variants = {
   show: {
     transform: "translateX(0em)",
-    opacity: 1
+    opacity: 1,
   },
   hide: {
-  transform: "translateX(5em)",
-    opacity: 0
-  }
-}
+    transform: "translateX(5em)",
+    opacity: 0,
+  },
+};
 
 export function NavMenu({ isOpen }) {
-  return <NavMenuContainer>
+  const navigate = useNavigate();
+
+  const logout = () => {
+    window.localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  return (
+    <NavMenuContainer>
       <NavList>
-          <NavLink initial={false} animate={isOpen ? "show" : "hide"} variants={{show: { ...variants.show, transition: { delay: 0.3, duration: 0.2 } }, hide: { ...variants.hide, transition: { delay: 0.25, duration: 0.05 },}}}>
+        <NavLink
+          initial={false}
+          animate={isOpen ? "show" : "hide"}
+          variants={{
+            show: {
+              ...variants.show,
+              transition: { delay: 0.3, duration: 0.2 },
+            },
+            hide: {
+              ...variants.hide,
+              transition: { delay: 0.25, duration: 0.05 },
+            },
+          }}
+        >
           <Link1 to="/vault">Your Passwords</Link1>
-          </NavLink>
+        </NavLink>
 
         <NavLink
           initial={false}
@@ -67,7 +89,7 @@ export function NavMenu({ isOpen }) {
             },
           }}
         >
-         <Link1 to="/storage">Secure Notes</Link1>
+          <Link1 to="/storage">Secure Notes</Link1>
         </NavLink>
         <NavLink
           initial={false}
@@ -111,12 +133,13 @@ export function NavMenu({ isOpen }) {
             },
             hide: {
               ...variants.hide,
-              transition: { delay: 0.30, duration: 0.05 },
+              transition: { delay: 0.3, duration: 0.05 },
             },
           }}
         >
-          <Link1 to="/">Logout</Link1>
+          <span onClick={logout}>Logout</span>
         </NavLink>
       </NavList>
-  </NavMenuContainer>
+    </NavMenuContainer>
+  );
 }
