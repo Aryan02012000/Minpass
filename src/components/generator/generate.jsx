@@ -15,6 +15,7 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Copy_Success } from "./message";
+import { checkBreach } from "../password_util";
 
 const AppContainer = styled.div`
   width: 100%;
@@ -110,31 +111,41 @@ const Generate = () => {
       characterList = characterList + specialCharactes;
     }
 
-    setpassword(createPassword(characterList));
+    (async () => {
+      setpassword(await createPassword(characterList));
+    })();
   };
 
-  const createPassword = (characterList) => {
-    let password = "";
-    const characterListLength = characterList.length;
-    const gen = randomGenerator();
+  const createPassword = (characterList) =>
+    new Promise(async (resolve, reject) => {
+      let password = "";
+      const characterListLength = characterList.length;
+      const gen = randomGenerator();
 
-    if (sampleData.current.length && micAllowed) {
-      notify("Using True Random generator", false);
-      for (let i = 0; i < passwordLength; i++) {
-        const characterIndex = Math.round(
-          gen.next().value * characterListLength
-        );
-        password = password + characterList.charAt(characterIndex);
+      if (sampleData.current.length && micAllowed) {
+        notify("Using True Random generator", false);
+        for (let i = 0; i < passwordLength; i++) {
+          const characterIndex = Math.round(
+            gen.next().value * characterListLength
+          );
+          password = password + characterList.charAt(characterIndex);
+        }
+      } else {
+        notify("Using PRNG, sample audio for True Random", true);
+        for (let i = 0; i < passwordLength; i++) {
+          const characterIndex = Math.round(
+            Math.random() * characterListLength
+          );
+          password = password + characterList.charAt(characterIndex);
+        }
       }
-    } else {
-      notify("Using PRNG, sample audio for True Random", true);
-      for (let i = 0; i < passwordLength; i++) {
-        const characterIndex = Math.round(Math.random() * characterListLength);
-        password = password + characterList.charAt(characterIndex);
+      if (await checkBreach(password)) {
+        notify("Generated password was in breach. Regenerating", false, true);
+        await createPassword(characterList);
+      } else {
+        resolve(password);
       }
-    }
-    return password;
-  };
+    });
 
   const copyToClipboard = () => {
     try {
@@ -149,9 +160,19 @@ const Generate = () => {
     }
   };
 
-  const notify = (message, hasError = false) => {
+  const notify = (message, hasError = false, hasInfo = false) => {
     if (hasError) {
       toast.error(message, {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } else if (hasInfo) {
+      toast.info(message, {
         position: "top-center",
         autoClose: 2000,
         hideProgressBar: true,
@@ -381,7 +402,6 @@ const Generate = () => {
             </Button>
             <Marginer direction="vertical" margin="1em" />
 
-            
             <ToastContainer
               position="top-center"
               autoClose={5000}
