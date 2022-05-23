@@ -12,6 +12,7 @@ import ReadOnlyRow from "./ReadOnlyRow";
 import EditableRow from "./EditableRow";
 import config from "../../config.json";
 import cryptoUtils from "../cryptoUtils";
+import { toast, ToastContainer } from "react-toastify";
 
 const AppContainer = styled.div`
   width: 100%;
@@ -103,9 +104,39 @@ const HomeVault = () => {
   //   setEditFormData(newFormData);
   // };
 
-  const handleEditFormChange = (eventData) => {
-    console.log(eventData);
-    setUser(users.map(u=>u.name===eventData.name?eventData:u))
+  const handleEditFormChange = async (eventData) => {
+    try {
+      const res = await axios.post(config.serverAddress + "/change_pass", {
+        jwt: window.localStorage.getItem("token"),
+        username: eventData.username,
+        service: eventData.name,
+        password: eventData.password,
+      });
+      if (res.status == 200) {
+        setUser(users.map((u) => (u.name === eventData.name ? eventData : u)));
+      } else {
+        toast.error(res.data, {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to connect", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
 
     // const fieldName = event.target.getAttribute("name");
     // const fieldValue = event.target.value;
@@ -137,10 +168,37 @@ const HomeVault = () => {
         password: encryptedPass,
       };
 
-      const newContacts = [...users, newContact];
-      setUser(newContacts);
+      const res = await axios.post(config.serverAddress + "/add_pass", {
+        jwt: window.localStorage.getItem("token"),
+        username: newContact.username,
+        service: newContact.name,
+        password: newContact.password,
+      });
+      if (res.status == 200) {
+        const newContacts = [...users, newContact];
+        setUser(newContacts);
+      } else {
+        toast.error(res.data, {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
     } catch (err) {
       console.log(err);
+      toast.error("Failed to connect", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
     // })();
   };
@@ -268,6 +326,17 @@ const HomeVault = () => {
           <Button style={{ height: "2.3em" }}>Add</Button>
         </form>
       </div>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </AppContainer>
   );
 };
