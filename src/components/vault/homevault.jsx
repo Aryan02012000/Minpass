@@ -11,6 +11,7 @@ import { Button } from "../homepage/button";
 import ReadOnlyRow from "./ReadOnlyRow";
 import EditableRow from "./EditableRow";
 import config from "../../config.json";
+import cryptoUtils from "../cryptoUtils";
 
 const AppContainer = styled.div`
   width: 100%;
@@ -90,30 +91,58 @@ const HomeVault = () => {
     setAddFormData(newFormData);
   };
 
-  const handleEditFormChange = (event) => {
-    event.preventDefault();
+  // const handleEditFormChange = (event) => {
+  //   event.preventDefault();
 
-    const fieldName = event.target.getAttribute("name");
-    const fieldValue = event.target.value;
+  //   const fieldName = event.target.getAttribute("name");
+  //   const fieldValue = event.target.value;
 
-    const newFormData = { ...editFormData };
-    newFormData[fieldName] = fieldValue;
+  //   const newFormData = { ...editFormData };
+  //   newFormData[fieldName] = fieldValue;
 
-    setEditFormData(newFormData);
+  //   setEditFormData(newFormData);
+  // };
+
+  const handleEditFormChange = (eventData) => {
+    console.log(eventData);
+    setUser(users.map(u=>u.name===eventData.name?eventData:u))
+
+    // const fieldName = event.target.getAttribute("name");
+    // const fieldValue = event.target.value;
+
+    // const newFormData = { ...editFormData };
+    // newFormData[fieldName] = fieldValue;
+    // console.log(newFormData)
+
+    // setEditFormData(newFormData);
   };
 
-  const handleAddFormSubmit = (event) => {
+  const handleAddFormSubmit = async (event) => {
     event.preventDefault();
 
-    const newContact = {
-      id: nanoid(),
-      name: addFormData.name,
-      username: addFormData.username,
-      password: addFormData.password,
-    };
+    // (async () => {
+    try {
+      const keydata = window.localStorage.getItem("derivedKey");
+      const key = await cryptoUtils.importKey(keydata, "raw");
 
-    const newContacts = [...users, newContact];
-    setUser(newContacts);
+      const encryptedPass = await cryptoUtils.encrypt(
+        key,
+        addFormData.password
+      );
+
+      const newContact = {
+        id: nanoid(),
+        name: addFormData.name,
+        username: addFormData.username,
+        password: encryptedPass,
+      };
+
+      const newContacts = [...users, newContact];
+      setUser(newContacts);
+    } catch (err) {
+      console.log(err);
+    }
+    // })();
   };
 
   const handleEditFormSubmit = (event) => {
@@ -184,11 +213,13 @@ const HomeVault = () => {
               <Fragment>
                 {editUserId === user.id ? (
                   <EditableRow
+                    key={index}
                     editFormData={editFormData}
                     handleEditFormChange={handleEditFormChange}
                   />
                 ) : (
                   <ReadOnlyRow
+                    key={index}
                     user={user}
                     handleEditClick={handleEditClick}
                     handleDeleteClick={handleDeleteClick}

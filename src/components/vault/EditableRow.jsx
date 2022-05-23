@@ -1,45 +1,85 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
 import { Button } from "../homepage/button";
+import cryptoUtils from "../cryptoUtils";
 
 const EditableRow = ({ editFormData, handleEditFormChange }) => {
-    return (
-        <tr>
-            <td>
-                <input
-                type="text"
-                required="required"
-                placeholder="Enter site name..."
-                name="name"
-                value={editFormData.name}
-                onChange={handleEditFormChange}
-                >
-                </input>
-            </td>
-            <td>
-            <input
-                type="text"
-                required="required"
-                placeholder="Enter user name..."
-                name="username"
-                value={editFormData.username}
-                onChange={handleEditFormChange}
-                ></input>
-            </td>
-            <td>
-            <input
-                type="password"
-                required="required"
-                placeholder="Enter password..."
-                name="password"
-                value={editFormData.password}
-                onChange={handleEditFormChange}
-                ></input>
-            </td>
-            <td>
-                <Button> Save </Button>
-            </td>
-        </tr>
-    )
-}
+  const [name, setName] = useState(editFormData.name);
+  const [username, setUsername] = useState(editFormData.username);
+  const [password, setPassword] = useState(editFormData.password);
 
-export default EditableRow
+  useEffect(() => {
+    (async () => {
+      try {
+        const keydata = window.localStorage.getItem("derivedKey");
+        const key = await cryptoUtils.importKey(keydata, "raw");
+
+        const decryptedPass = await cryptoUtils.decrypt(
+          key,
+          editFormData.password
+        );
+
+        setPassword(decryptedPass);
+      } catch (err) {
+        console.log(err);
+      }
+    })();
+  }, [editFormData.password]);
+
+  const handleSubmit = async () => {
+    try {
+      const keydata = window.localStorage.getItem("derivedKey");
+      const key = await cryptoUtils.importKey(keydata, "raw");
+
+      const encryptedPass = await cryptoUtils.encrypt(key, password);
+
+      handleEditFormChange({
+        name,
+        username,
+        password: encryptedPass,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
+    <tr>
+      <td>
+        <input
+          type="text"
+          required="required"
+          placeholder="Enter site name..."
+          readOnly={true}
+          name="name"
+          value={name}
+          //   onChange={(e) => setName(e.target.value)}
+        ></input>
+      </td>
+      <td>
+        <input
+          type="text"
+          required="required"
+          placeholder="Enter user name..."
+          name="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        ></input>
+      </td>
+      <td>
+        <input
+          type="text"
+          required="required"
+          placeholder="Enter password..."
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        ></input>
+      </td>
+      <td>
+        <Button onClick={handleSubmit}> Save </Button>
+      </td>
+    </tr>
+  );
+};
+
+export default EditableRow;
