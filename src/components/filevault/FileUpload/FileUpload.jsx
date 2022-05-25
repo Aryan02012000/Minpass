@@ -11,7 +11,14 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
   const uploadHandler = (event) => {
     const file = event.target.files[0];
     file.isUploading = true;
-    setFiles([...files, file]);
+
+    // const fr = new FileReader();
+    // fr.onloadend = function (e) {
+    //   setFiles([...files, { name: file.name, content: e.target.result }]);
+    // };
+    // fr.readAsText(file);
+
+    // setFiles([...files, file]);
 
     //upload file
 
@@ -21,17 +28,20 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
       "imageFile",
       file
     );
+
+    formData.append("jwt", window.localStorage.getItem("token"));
     axios
-      .post(config.serverAddress + "/upload", formData, {
+      .post(config.serverAddress + "/add_file", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((res) => {
         file.isUploading = false;
-        setFiles([...files, file]);
+        // setFiles([...files, { name: file.name, content: e.target.result }]);
       })
       .catch((err) => {
         //inform the user
         console.error(err);
+        file.isUploading = false;
         removeFile(file.name);
       });
   };
@@ -43,7 +53,7 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
             type="file"
             style={{
               position: "relative",
-              "text-align": "right",
+              "textAlign": "right",
               opacity: "0",
               "z-index": "2",
               cursor: "pointer",
@@ -59,14 +69,14 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
               left: "0px",
               width: "100%",
               height: "100%",
-              "z-index": "1",
+              zIndex: "1",
               display: "flex",
-              "justify-content": "center",
-              "align-items": "center",
-              "font-size": "1.1rem",
+              justifyContent: "center",
+              alignItems: "center",
+              fontSize: "1.1rem",
               // padding: 1em;
               transition: "background-color 0.4s",
-              "box-shadow": "0px 8px 24px rgba(149, 157, 165, 0.5)",
+              boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.5)",
             }}
           >
             <i
@@ -74,14 +84,14 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
                 width: "1.5em",
                 height: "1.5em",
                 padding: "0.4em",
-                "background-color": "#fff",
+                backgroundColor: "#fff",
                 color: "#aaa",
-                "border-radius": "50%",
+                borderRadius: "50%",
                 display: "flex",
-                "justify-content": "center",
-                "align-items": "center",
-                "margin-right": "0.8em",
-                "font-size": "0.8em",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: "0.8em",
+                fontSize: "0.8em",
               }}
             >
               <FontAwesomeIcon icon={faPlus} />
@@ -90,7 +100,7 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
           </Button>
         </div>
         <p className="main"> Support files</p>
-        <p className="info"> PDF, JPG, PNG</p>
+        <p className="info"> TXT, JSON, YAML</p>
       </div>
     </>
   );
