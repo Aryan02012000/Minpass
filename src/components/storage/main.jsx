@@ -1,17 +1,64 @@
 import "./ds.css";
 import ReactMarkdown from "react-markdown";
 import { Button } from "../homepage/button";
+import cryptoUtils from "../cryptoUtils";
+import axios from "axios";
+import config from "../../config.json";
+import { useEffect, useState } from "react";
 
-function Main({ activeNote, onUpdateNote }) {
-  const onEditField = (key, value) => {
-    onUpdateNote({
-      ...activeNote,
-      [key]: value,
-      lastModified: Date.now(),
-    });
+function Main({ activeNote, setActiveNote, onUpdateNote }) {
+  const [note, setNote] = useState("");
+  const [title, setTitle] = useState("Untitled Note");
+
+  useEffect(() => {
+    (async () => {
+      if (!activeNote || !activeNote.body) {
+        return;
+      }
+
+      try {
+        const keydata = window.localStorage.getItem("derivedKey");
+        const key = await cryptoUtils.importKey(keydata, "raw");
+
+        const decryptedNote = await cryptoUtils.decrypt(key, activeNote.body);
+
+        setTitle(activeNote.title);
+        setNote(decryptedNote);
+      } catch (err) {
+        console.log(err);
+      }
+    })();
+  }, [activeNote]);
+
+  const saveNote = async () => {
+    try {
+      const keydata = window.localStorage.getItem("derivedKey");
+      const key = await cryptoUtils.importKey(keydata, "raw");
+
+      const encryptedNote = await cryptoUtils.encrypt(key, note);
+
+      const lastModified = Date.now();
+
+      const res = await axios.post(config.serverAddress + "/add_note", {
+        jwt: window.localStorage.getItem("token"),
+        "note-id": activeNote.id,
+        title: title,
+        body: encryptedNote,
+        timestamp: lastModified,
+      });
+      onUpdateNote({
+        ...activeNote,
+        body: encryptedNote,
+        title: title,
+        lastModified,
+      });
+      setActiveNote(false);
+      setTitle("");
+      setNote("");
+    } catch (e) {
+      console.error(e);
+    }
   };
-
-  const saveNote = () => {};
 
   if (!activeNote)
     return <div className="no-active-note">No note selected</div>;
@@ -23,8 +70,8 @@ function Main({ activeNote, onUpdateNote }) {
           <input
             type="text"
             id="title"
-            value={activeNote.title}
-            onChange={(e) => onEditField("title", e.target.value)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             autoFocus
             style={{ flexGrow: 1 }}
           />
@@ -35,15 +82,13 @@ function Main({ activeNote, onUpdateNote }) {
         <textarea
           id="body"
           placeholder="Write your note here..."
-          value={activeNote.body}
-          onChange={(e) => onEditField("body", e.target.value)}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
         />
       </div>
       <div className="app-main-note-preview">
-        <h1 className="preview-title">{activeNote.title}</h1>
-        <ReactMarkdown className="markdown-preview">
-          {activeNote.body}
-        </ReactMarkdown>
+        <h1 className="preview-title">{title}</h1>
+        <ReactMarkdown className="markdown-preview">{note}</ReactMarkdown>
       </div>
     </div>
   );

@@ -51,10 +51,10 @@ const HomeVault = () => {
   useEffect(() => {
     if (localStorage.getItem("token")) {
       loadUsers();
-      (async () => {
-        const result = await axios.get(config.serverAddress + "/users");
-        setUser(result.data);
-      })();
+      // (async () => {
+      //   const result = await axios.get(config.serverAddress + "/all_pass");
+      //   setUser(result.data);
+      // })();
     } else {
       navigate("/signup");
     }
@@ -65,8 +65,8 @@ const HomeVault = () => {
   const [info, setinfo] = useState(false);
 
   const loadUsers = async () => {
-    const result = await axios.get(config.serverAddress + "/users");
-    setUser(result.data);
+    const result = await axios.post(config.serverAddress + "/users",{jwt:window.localStorage.getItem("token")});
+    setUser(result.data.map(d=>({name:d.service,username:d.username,password:d.password})));
   };
   const [addFormData, setAddFormData] = useState({
     name: " ",
