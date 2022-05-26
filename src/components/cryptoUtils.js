@@ -29,14 +29,16 @@ export function generateRSAKeyPair() {
   });
 }
 
-export function encrypt(publicKey, data, toString = true) {
+export function encrypt(key, data, toString = true) {
   return new Promise((resolve, reject) => {
     window.crypto.subtle
       .encrypt(
         {
-          name: "RSA-OAEP",
+          // name: "RSA-OAEP",
+          name: "AES-CBC",
+          iv: stringToArrayBuffer("ABCDEFGH"),
         },
-        publicKey,
+        key,
         stringToArrayBuffer(data)
       )
       .then((encData) =>
@@ -46,14 +48,16 @@ export function encrypt(publicKey, data, toString = true) {
   });
 }
 
-export function decrypt(privateKey, data) {
+export function decrypt(key, data) {
   return new Promise((resolve, reject) => {
     window.crypto.subtle
       .decrypt(
         {
-          name: "RSA-OAEP",
+          // name: "RSA-OAEP",
+          name: "AES-CBC",
+          iv: stringToArrayBuffer("ABCDEFGH"),
         },
-        privateKey,
+        key,
         data instanceof ArrayBuffer ? data : stringToArrayBuffer(data)
       )
       .then((d) => resolve(arrayBufferToString(d)))
@@ -107,11 +111,16 @@ export function importKey(keyData, format) {
         format,
         stringToArrayBuffer(keyData),
         {
-          name: "RSA-OAEP",
-          hash: "SHA-512",
+          // name: "RSA-OAEP",
+          // hash: "SHA-512",
+          name: "AES-CBC",
         },
         true,
-        format === "spki" ? ["encrypt"] : format === "pkcs8" ? ["decrypt"] : []
+        format === "spki"
+          ? ["encrypt"]
+          : format === "pkcs8"
+          ? ["decrypt"]
+          : ["encrypt", "decrypt"]
       )
       .then(resolve)
       .catch(reject);

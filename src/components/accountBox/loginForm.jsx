@@ -87,7 +87,7 @@ function LoginForm(props) {
     setDisable(false);
   });
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     if (!email || !password) {
       toast.error("Email and password required", {
         position: "top-center",
@@ -110,12 +110,29 @@ function LoginForm(props) {
         email,
         password,
       })
-      .then((res) => {
+      .then(async (res) => {
         if (res.status == 200) {
-          // console.log(res.data.token.toString());
           window.localStorage.setItem("token", "res.data.token");
-          setDisable(false);
-          return navigate("/vault");
+          try {
+            let derivedKey = await cryptoUtils.PBKDF2(password, email);
+
+            window.localStorage.setItem(
+              "derivedKey",
+              await cryptoUtils.exportKey(derivedKey, "raw")
+            );
+            setDisable(false);
+            return navigate("/vault");
+          } catch (e) {
+            toast.error("Error deriving key", {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+          }
         } else {
           toast.error(res.data.message, {
             position: "top-center",

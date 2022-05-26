@@ -11,6 +11,8 @@ import { Button } from "../homepage/button";
 import ReadOnlyRow from "./ReadOnlyRow";
 import EditableRow from "./EditableRow";
 import config from "../../config.json";
+import cryptoUtils from "../cryptoUtils";
+import { toast, ToastContainer } from "react-toastify";
 
 const AppContainer = styled.div`
   width: 100%;
@@ -49,10 +51,10 @@ const HomeVault = () => {
   useEffect(() => {
     if (localStorage.getItem("token")) {
       loadUsers();
-      (async () => {
-        const result = await axios.get(config.serverAddress + "/users");
-        setUser(result.data);
-      })();
+      // (async () => {
+      //   const result = await axios.get(config.serverAddress + "/all_pass");
+      //   setUser(result.data);
+      // })();
     } else {
       navigate("/signup");
     }
@@ -63,8 +65,8 @@ const HomeVault = () => {
   const [info, setinfo] = useState(false);
 
   const loadUsers = async () => {
-    const result = await axios.get(config.serverAddress + "/users");
-    setUser(result.data);
+    const result = await axios.post(config.serverAddress + "/users",{jwt:window.localStorage.getItem("token")});
+    setUser(result.data.map(d=>({name:d.service,username:d.username,password:d.password})));
   };
   const [addFormData, setAddFormData] = useState({
     name: " ",
@@ -90,30 +92,115 @@ const HomeVault = () => {
     setAddFormData(newFormData);
   };
 
-  const handleEditFormChange = (event) => {
-    event.preventDefault();
+  // const handleEditFormChange = (event) => {
+  //   event.preventDefault();
 
-    const fieldName = event.target.getAttribute("name");
-    const fieldValue = event.target.value;
+  //   const fieldName = event.target.getAttribute("name");
+  //   const fieldValue = event.target.value;
 
-    const newFormData = { ...editFormData };
-    newFormData[fieldName] = fieldValue;
+  //   const newFormData = { ...editFormData };
+  //   newFormData[fieldName] = fieldValue;
 
-    setEditFormData(newFormData);
+  //   setEditFormData(newFormData);
+  // };
+
+  const handleEditFormChange = async (eventData) => {
+    try {
+      const res = await axios.post(config.serverAddress + "/change_pass", {
+        jwt: window.localStorage.getItem("token"),
+        username: eventData.username,
+        service: eventData.name,
+        password: eventData.password,
+      });
+      if (res.status == 200) {
+        setUser(users.map((u) => (u.name === eventData.name ? eventData : u)));
+      } else {
+        toast.error(res.data, {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to connect", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+
+    // const fieldName = event.target.getAttribute("name");
+    // const fieldValue = event.target.value;
+
+    // const newFormData = { ...editFormData };
+    // newFormData[fieldName] = fieldValue;
+    // console.log(newFormData)
+
+    // setEditFormData(newFormData);
   };
 
-  const handleAddFormSubmit = (event) => {
+  const handleAddFormSubmit = async (event) => {
     event.preventDefault();
 
-    const newContact = {
-      id: nanoid(),
-      name: addFormData.name,
-      username: addFormData.username,
-      password: addFormData.password,
-    };
+    // (async () => {
+    try {
+      const keydata = window.localStorage.getItem("derivedKey");
+      const key = await cryptoUtils.importKey(keydata, "raw");
 
-    const newContacts = [...users, newContact];
-    setUser(newContacts);
+      const encryptedPass = await cryptoUtils.encrypt(
+        key,
+        addFormData.password
+      );
+
+      const newContact = {
+        id: nanoid(),
+        name: addFormData.name,
+        username: addFormData.username,
+        password: encryptedPass,
+      };
+
+      const res = await axios.post(config.serverAddress + "/add_pass", {
+        jwt: window.localStorage.getItem("token"),
+        username: newContact.username,
+        service: newContact.name,
+        password: newContact.password,
+      });
+      if (res.status == 200) {
+        const newContacts = [...users, newContact];
+        setUser(newContacts);
+      } else {
+        toast.error(res.data, {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to connect", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    // })();
   };
 
   const handleEditFormSubmit = (event) => {
@@ -184,11 +271,13 @@ const HomeVault = () => {
               <Fragment>
                 {editUserId === user.id ? (
                   <EditableRow
+                    key={index}
                     editFormData={editFormData}
                     handleEditFormChange={handleEditFormChange}
                   />
                 ) : (
                   <ReadOnlyRow
+                    key={index}
                     user={user}
                     handleEditClick={handleEditClick}
                     handleDeleteClick={handleDeleteClick}
@@ -237,6 +326,17 @@ const HomeVault = () => {
           <Button style={{ height: "2.3em" }}>Add</Button>
         </form>
       </div>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </AppContainer>
   );
 };

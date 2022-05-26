@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Marginer } from "../marginer";
 import { Nav } from "../vault/Nav";
-import FileList from './FileList/FileList';
+import FileList from "./FileList/FileList";
 //import axios from "axios";
 //import { useNavigate } from 'react-router-dom';
 import { Button } from "../homepage/button";
-import { FileUpload } from './FileUpload/FileUpload';
-import axios from 'axios';
+import { FileUpload } from "./FileUpload/FileUpload";
+import axios from "axios";
+import config from "../../config.json";
+
 const AppContainer = styled.div`
   width: 100%;
   display: flex;
@@ -41,39 +43,48 @@ const TextContent = styled.h2`
   justify-content: center;
 `;
 const FileVault = () => {
+  const [files, setFiles] = useState([
+    // {name:"",content:""}
+  ]);
 
-    const [files, setFiles] = useState([
-      // {name:"",url:""}
-  ])
+  useEffect(() => {
+    axios
+      .post(config.serverAddress + "/all_files", {
+        jwt: window.localStorage.getItem("token"),
+      })
+      .then((res) =>
+        setFiles(
+          res.data.map((f) => ({ name: f.filename, content: f.content }))
+        )
+      );
+  });
 
-  useEffect( ()=> {
-    axios.get('http://192.168.1.5:5000/list')
-    .then(res => setFiles(res.data))
-  })
+  const removeFile = (filename) => {
+    setFiles(files.filter((file) => file.name !== filename));
+  };
 
-
-    const removeFile = (filename) => {
-      setFiles(files.filter(file => file.name !== filename))
-    }
-
-    console.log(files)
+  console.log(files);
 
   return (
     <>
-    <AppContainer>
-      <Nav />
-      <Marginer direction="vertical" margin="5em"/>
-      <SomeContent>FileVault</SomeContent>
-     </AppContainer>
-     <TextContent>Upload your file</TextContent>
-     <BodyContainer>
-     <MainContainer>
-      <FileUpload files={files} setFiles={setFiles}  removeFile={removeFile}/>
-     </MainContainer>
-     <FileList files = {files} removeFile={removeFile} />
-     </BodyContainer>
-     </>
-  )
-}
+      <AppContainer>
+        <Nav />
+        <Marginer direction="vertical" margin="5em" />
+        <SomeContent>FileVault</SomeContent>
+      </AppContainer>
+      <TextContent>Upload your file</TextContent>
+      <BodyContainer>
+        <MainContainer>
+          <FileUpload
+            files={files}
+            setFiles={setFiles}
+            removeFile={removeFile}
+          />
+        </MainContainer>
+        <FileList files={files} removeFile={removeFile} />
+      </BodyContainer>
+    </>
+  );
+};
 
 export default FileVault;
