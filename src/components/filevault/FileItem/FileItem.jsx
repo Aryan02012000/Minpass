@@ -7,7 +7,7 @@ import {
   // faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 const FileItem = ({ file, content }) => {
-  const blobData = new Blob([content], { type: "application/octet-stream" });
+  const blobData = new Blob([atob(content)], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blobData);
 
   return (
