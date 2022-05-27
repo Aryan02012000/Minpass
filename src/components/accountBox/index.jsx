@@ -220,7 +220,7 @@ const AccountBox = () => {
             </TopContainer>
             <InnerContainer>
               {active === "signin" && <LoginForm />}
-              {active === "signup" && <SignupForm />}
+              {active === "signup" && <SignupForm redirectHandler={setActive} />}
               {active === "forget" && <ForgetForm />}
               {active === "verify" && (
                 <VerifyForm email={email.current} question={question.current} />

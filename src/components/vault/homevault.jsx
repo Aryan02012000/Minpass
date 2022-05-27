@@ -47,14 +47,26 @@ const SomeContent = styled.h2`
 
 const HomeVault = () => {
   const [users, setUser] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      loadUsers();
-      // (async () => {
-      //   const result = await axios.get(config.serverAddress + "/all_pass");
-      //   setUser(result.data);
-      // })();
+      (async () => {
+        const result = await axios.post(config.serverAddress + "/all_pass", {
+          jwt: window.localStorage.getItem("token"),
+        });
+        if (result.data && result.data.data && result.data.data.length) {
+          setUser(
+            result.data.data.map((d) => ({
+              name: d.service,
+              username: d.username,
+              password: d.password,
+            }))
+          );
+        }
+        setLoading(false);
+      })();
     } else {
       navigate("/signup");
     }
@@ -64,10 +76,6 @@ const HomeVault = () => {
 
   const [info, setinfo] = useState(false);
 
-  const loadUsers = async () => {
-    const result = await axios.post(config.serverAddress + "/users",{jwt:window.localStorage.getItem("token")});
-    setUser(result.data.map(d=>({name:d.service,username:d.username,password:d.password})));
-  };
   const [addFormData, setAddFormData] = useState({
     name: " ",
     username: " ",
@@ -112,10 +120,10 @@ const HomeVault = () => {
         service: eventData.name,
         password: eventData.password,
       });
-      if (res.status == 200) {
+      if (res.status === 200) {
         setUser(users.map((u) => (u.name === eventData.name ? eventData : u)));
       } else {
-        toast.error(res.data, {
+        toast.error(res.data.message, {
           position: "top-center",
           autoClose: 2000,
           hideProgressBar: true,
@@ -174,9 +182,14 @@ const HomeVault = () => {
         service: newContact.name,
         password: newContact.password,
       });
-      if (res.status == 200) {
+      if (res.status === 200) {
         const newContacts = [...users, newContact];
         setUser(newContacts);
+        setAddFormData({
+          name: " ",
+          username: " ",
+          password: " ",
+        });
       } else {
         toast.error(res.data, {
           position: "top-center",
@@ -337,6 +350,27 @@ const HomeVault = () => {
         draggable
         pauseOnHover
       />
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100vh",
+            width: "100vw",
+            backgroundColor: "#0000007f",
+            zIndex: 999,
+            color: "white",
+            fontSize: "4em",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          Loading
+        </div>
+      )}
     </AppContainer>
   );
 };

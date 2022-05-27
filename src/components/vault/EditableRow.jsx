@@ -3,7 +3,7 @@ import { Button } from "../homepage/button";
 import cryptoUtils from "../cryptoUtils";
 
 const EditableRow = ({ editFormData, handleEditFormChange }) => {
-  const [name, setName] = useState(editFormData.name);
+  // const [name, setName] = useState(editFormData.name);
   const [username, setUsername] = useState(editFormData.username);
   const [password, setPassword] = useState(editFormData.password);
 
@@ -23,7 +23,8 @@ const EditableRow = ({ editFormData, handleEditFormChange }) => {
         console.log(err);
       }
     })();
-  }, [editFormData.password]);
+    // }, [editFormData.password]);
+  }, []);
 
   const handleSubmit = async () => {
     try {
@@ -33,7 +34,7 @@ const EditableRow = ({ editFormData, handleEditFormChange }) => {
       const encryptedPass = await cryptoUtils.encrypt(key, password);
 
       handleEditFormChange({
-        name,
+        name: editFormData.name,
         username,
         password: encryptedPass,
       });
@@ -51,7 +52,7 @@ const EditableRow = ({ editFormData, handleEditFormChange }) => {
           placeholder="Enter site name..."
           readOnly={true}
           name="name"
-          value={name}
+          value={editFormData.name}
           //   onChange={(e) => setName(e.target.value)}
         ></input>
       </td>

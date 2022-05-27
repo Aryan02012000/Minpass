@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   BoldLink,
   BoxContainer,
@@ -25,6 +25,30 @@ function SignupForm(props) {
   const [disabled, setDisable] = React.useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+
+  useEffect(() => {
+    if (window.localStorage.getItem("token")) {
+      (async () => {
+        try {
+          const res = await axios.get(
+            config.serverAddress +
+              "/api/user?jwt=" +
+              window.localStorage.getItem("token")
+          );
+          if (res.status == 200) {
+            navigate("/vault");
+          } else {
+          }
+        } catch (e) {
+          setDisable(false);
+        }
+      })();
+    } else {
+      setDisable(false);
+    }
+
+    setDisable(false);
+  }, []);
 
   const handleSignup = (e) => {
     if (disabled) {
@@ -66,18 +90,19 @@ function SignupForm(props) {
             draggable: true,
             progress: undefined,
           });
-          toast.success("Redirecting to login", {
-            position: "top-center",
-            autoClose: 2000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-          setTimeout(() => {
-            return navigate("/signup");
-          }, 2100);
+          // toast.success("Redirecting to login", {
+          //   position: "top-center",
+          //   autoClose: 2000,
+          //   hideProgressBar: true,
+          //   closeOnClick: true,
+          //   pauseOnHover: true,
+          //   draggable: true,
+          //   progress: undefined,
+          // });
+          // setTimeout(() => {
+          //   // navigate("/signin");
+          //   props.redirectHandler("signup");
+          // }, 2100);
         } else {
           console.error("err");
           Object.entries(res.data).forEach(([f, e]) => {
