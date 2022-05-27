@@ -43,27 +43,37 @@ const TextContent = styled.h2`
   justify-content: center;
 `;
 const FileVault = () => {
-  const [files, setFiles] = useState([
-    // {name:"",content:""}
-  ]);
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .post(config.serverAddress + "/all_files", {
-        jwt: window.localStorage.getItem("token"),
-      })
-      .then((res) =>
-        setFiles(
-          res.data.map((f) => ({ name: f.filename, content: f.content }))
-        )
-      );
-  });
+    (async () => {
+      try {
+        const res = await axios.post(config.serverAddress + "/all_files", {
+          jwt: window.localStorage.getItem("token"),
+        });
+        console.log(res.data);
+        console.log(res.data.data);
+        if (res.data && res.data.data && res.data.data.length) {
+          console.log(res.data.data.data);
+          setFiles(
+            res.data.data.map((f) => ({
+              name: f.filename,
+              content: f.content,
+            }))
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const removeFile = (filename) => {
     setFiles(files.filter((file) => file.name !== filename));
   };
-
-  console.log(files);
 
   return (
     <>
@@ -83,6 +93,28 @@ const FileVault = () => {
         </MainContainer>
         <FileList files={files} removeFile={removeFile} />
       </BodyContainer>
+
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100vh",
+            width: "100vw",
+            backgroundColor: "#0000007f",
+            zIndex: 999,
+            color: "white",
+            fontSize: "4em",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          Loading
+        </div>
+      )}
     </>
   );
 };

@@ -6,7 +6,7 @@ import axios from "axios";
 import config from "../../config.json";
 import { useEffect, useState } from "react";
 
-function Main({ activeNote, setActiveNote, onUpdateNote }) {
+function Main({ activeNote, setActiveNote, onUpdateNote, setLoading }) {
   const [note, setNote] = useState("");
   const [title, setTitle] = useState("Untitled Note");
 
@@ -20,7 +20,10 @@ function Main({ activeNote, setActiveNote, onUpdateNote }) {
         const keydata = window.localStorage.getItem("derivedKey");
         const key = await cryptoUtils.importKey(keydata, "raw");
 
-        const decryptedNote = await cryptoUtils.decrypt(key, activeNote.body);
+        const decryptedNote = await cryptoUtils.decrypt(
+          key,
+          Buffer.from(activeNote.body, "base64").toString()
+        );
 
         setTitle(activeNote.title);
         setNote(decryptedNote);
@@ -32,31 +35,44 @@ function Main({ activeNote, setActiveNote, onUpdateNote }) {
 
   const saveNote = async () => {
     try {
+      setLoading(true);
       const keydata = window.localStorage.getItem("derivedKey");
       const key = await cryptoUtils.importKey(keydata, "raw");
 
-      const encryptedNote = await cryptoUtils.encrypt(key, note);
+      const encryptedNote = Buffer.from(
+        await cryptoUtils.encrypt(key, note),
+        "utf8"
+      ).toString("base64");
 
       const lastModified = Date.now();
 
       const res = await axios.post(config.serverAddress + "/add_note", {
         jwt: window.localStorage.getItem("token"),
-        "note-id": activeNote.id,
+        noteid: activeNote.id,
         title: title,
         body: encryptedNote,
         timestamp: lastModified,
       });
-      onUpdateNote({
-        ...activeNote,
-        body: encryptedNote,
-        title: title,
-        lastModified,
-      });
-      setActiveNote(false);
-      setTitle("");
-      setNote("");
+
+      if (res.status === 200) {
+        // console.log(encryptedNote);
+
+        // console.log(Buffer.from(encryptedNote).toString("base64"));
+
+        onUpdateNote({
+          ...activeNote,
+          body: encryptedNote,
+          title: title,
+          lastModified,
+        });
+        setActiveNote(false);
+        setTitle("");
+        setNote("");
+      }
     } catch (e) {
       console.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 

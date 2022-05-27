@@ -13,6 +13,7 @@ function Divide() {
   //   const [notes, setNotes] = useState(JSON.parse(localStorage.notes) || []);
   const [notes, setNotes] = useState([]);
   const [activeNote, setActiveNote] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // localStorage.setItem("notes", JSON.stringify(notes));
@@ -22,19 +23,22 @@ function Divide() {
           jwt: window.localStorage.getItem("token"),
         });
 
-        setNotes(
-          res.data.map((n) => ({
-            id: n.id,
-            title: n.title,
-            body: n.body,
-            lastModified: n.lastModified,
-          }))
-        );
+        if (res.data && res.data.data && res.data.data.length)
+          setNotes(
+            res.data.data.map((n) => ({
+              id: n.id,
+              title: n.title,
+              body: n.body,
+              lastModified: n.lastModified,
+            }))
+          );
       } catch (e) {
         console.log(e);
+      } finally {
+        setLoading(false);
       }
     })();
-  }, [notes]);
+  }, []);
 
   const onAddNote = () => {
     const newNote = {
@@ -81,7 +85,29 @@ function Divide() {
         activeNote={getActiveNote()}
         setActiveNote={setActiveNote}
         onUpdateNote={onUpdateNote}
+        setLoading={setLoading}
       />
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100vh",
+            width: "100vw",
+            backgroundColor: "#0000007f",
+            zIndex: 999,
+            color: "white",
+            fontSize: "4em",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          Loading
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../../homepage/button";
 import "./FileUploader.css";
 import { theme } from "../../../theme";
@@ -8,9 +8,12 @@ import axios from "axios";
 import config from "../../../config.json";
 
 export const FileUpload = ({ files, setFiles, removeFile }) => {
+  const [loading, setLoading] = useState(false);
+
   const uploadHandler = (event) => {
     const file = event.target.files[0];
     file.isUploading = true;
+    setLoading(true);
 
     // const fr = new FileReader();
     // fr.onloadend = function (e) {
@@ -29,12 +32,19 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
       file
     );
 
-    formData.append("jwt", window.localStorage.getItem("token"));
     axios
       .post(config.serverAddress + "/add_file", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+        },
       })
       .then((res) => {
+        if (res.status === 200) {
+          setFiles([...files, res.data]);
+        } else {
+          console.error(res.data);
+        }
         file.isUploading = false;
         // setFiles([...files, { name: file.name, content: e.target.result }]);
       })
@@ -43,7 +53,8 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
         console.error(err);
         file.isUploading = false;
         removeFile(file.name);
-      });
+      })
+      .finally(() => setLoading(false));
   };
   return (
     <>
@@ -53,7 +64,7 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
             type="file"
             style={{
               position: "relative",
-              "textAlign": "right",
+              textAlign: "right",
               opacity: "0",
               "z-index": "2",
               cursor: "pointer",
@@ -99,9 +110,30 @@ export const FileUpload = ({ files, setFiles, removeFile }) => {
             Upload
           </Button>
         </div>
-        <p className="main"> Support files</p>
-        <p className="info"> TXT, JSON, YAML</p>
+        <p className="main">Supports text files</p>
+        <p className="info"> TXT, JSON, YAML ...</p>
       </div>
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100vh",
+            width: "100vw",
+            backgroundColor: "#0000007f",
+            zIndex: 999,
+            color: "white",
+            fontSize: "4em",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          Uploading
+        </div>
+      )}
     </>
   );
 };

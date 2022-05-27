@@ -47,19 +47,23 @@ function LoginForm(props) {
       })();
     } else {
       (async () => {
-        const publicKey = window.localStorage.getItem("publicKey");
-        const privateKey = window.localStorage.getItem("privateKey");
+        try {
+          const publicKey = window.localStorage.getItem("publicKey");
+          const privateKey = window.localStorage.getItem("privateKey");
 
-        const importedPublicKey = await cryptoUtils.importKey(
-          publicKey,
-          "spki"
-        );
-        const importedPrivateKey = await cryptoUtils.importKey(
-          privateKey,
-          "pkcs8"
-        );
+          const importedPublicKey = await cryptoUtils.importKey(
+            publicKey,
+            "spki"
+          );
+          const importedPrivateKey = await cryptoUtils.importKey(
+            privateKey,
+            "pkcs8"
+          );
 
-        // console.log(importedPublicKey, importedPrivateKey);
+          console.log(importedPublicKey, importedPrivateKey);
+        } catch (e) {
+          console.log(e);
+        }
       })();
     }
 
@@ -68,12 +72,22 @@ function LoginForm(props) {
         try {
           const res = await axios.get(
             config.serverAddress +
-              "/api/user?jwt=" +
+              "/user?jwt=" +
               window.localStorage.getItem("token")
           );
           if (res.status == 200) {
             navigate("/vault");
-          } else {
+          } else if (res.status === 400) {
+            toast.error(res.data.message, {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+            setDisable(false);
           }
         } catch (e) {
           navigate("/vault");
@@ -85,7 +99,7 @@ function LoginForm(props) {
     }
 
     setDisable(false);
-  });
+  }, []);
 
   const handleLogin = async (e) => {
     if (!email || !password) {
@@ -107,12 +121,12 @@ function LoginForm(props) {
     setDisable(true);
     axios
       .post(config.serverAddress + "/login", {
-        email,
-        password,
+        email: email,
+        password: password,
       })
       .then(async (res) => {
         if (res.status == 200) {
-          window.localStorage.setItem("token", "res.data.token");
+          window.localStorage.setItem("token", res.data.jwt);
           try {
             let derivedKey = await cryptoUtils.PBKDF2(password, email);
 
@@ -146,19 +160,29 @@ function LoginForm(props) {
           setDisable(false);
         }
       })
-      .catch(async (err) => {
-        toast.error("Failed to connect", {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        console.error(err);
+      .catch((err) => {
+        if (err.response.status === 400 || err.response.status === 404) {
+          toast.error(err.response.data.message, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        } else {
+          toast.error("Failed to connect", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        }
         setDisable(false);
-        return navigate("/vault");
       });
   };
 
